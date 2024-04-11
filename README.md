@@ -9,6 +9,7 @@
 [What is a
 storyboard?](https://www.google.com/search?hl=en&q=what%20is%20storyboarding#ip=1)
 
+!![Fireworks](Fireworks Story Board Made by Super Kings.jpeg)
 It is an industry standard practice to create a rough
 sketch of target outcome of an animation through a few
 key-frames sketched on a piece of paper like a comic
