@@ -1,1 +1,1 @@
-# FireWorks-Animation-Computer-Graphics-ProjectProject
+# FireWorks-Animation-Computer-Graphics-Project
