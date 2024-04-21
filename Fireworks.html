@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fireworks</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #000;
+      color: white; /* Default text color */
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    #diwali-text {
+      font-size: 48px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: changeColor 5s infinite alternate; /* Text color animation */
+    }
+
+    @keyframes changeColor {
+      0% { color: white; }
+      25% { color: #ff0000; } /* Red color */
+      50% { color: #ffcc00; } /* Yellow color */
+      75% { color: #00ff00; } /* Green color */
+      100% { color: pink; } 
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fireworks-canvas"></canvas>
+  <div id="diwali-text">Congratulations!!!</div>
+
+  <script>
+    const canvas = document.getElementById('fireworks-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const fireworkCount = 10;
+    const fireworkRadius = 1;
+    const fireworkLifetime = 2000; // milliseconds
+    const sparkCount = 30;
+    const sparkRadius = 3;
+    const sparkLifetime = 1000; // milliseconds
+    const gravity = 0.2;
+    const fireworksSound = new Audio('fireworks_sound.mp3');
+
+    // Star positions
+    const starPositions = [
+      { x: 100, y: 50 },
+      { x: 200, y: 100 },
+      { x: 300, y: 70 },
+      { x: 400, y: 120 },
+      { x: 500, y: 90 },
+      { x: 600, y: 60 },
+      { x: 700, y: 130 },
+      { x: 800, y: 80 },
+      { x: 900, y: 40 },
+      { x: 1000, y: 110 }
+    ];
+
+    // Star drawing function
+    function drawStars() {
+      ctx.fillStyle = "#fff"; // white
+      for (const position of starPositions) {
+        let x = position.x;
+        let y = position.y;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + 2, y + 4);
+        ctx.lineTo(x + 5, y + 4);
+        ctx.lineTo(x + 3, y + 7);
+        ctx.lineTo(x + 4, y + 10);
+        ctx.lineTo(x, y + 8);
+        ctx.lineTo(x - 4, y + 10);
+        ctx.lineTo(x - 3, y + 7);
+        ctx.lineTo(x - 5, y + 4);
+        ctx.lineTo(x - 2, y + 4);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    // Draw stars initially
+    drawStars();
+
+    class Firework {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * (canvas.height / 2); // Ensures fireworks spawn in the upper half
+        this.vx = Math.random() * 4 - 2;
+        this.vy = Math.random() * -10 - 5;
+        this.radius = fireworkRadius;
+        this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        this.createdAt = performance.now();
+        this.sparks = [];
+        fireworksSound.play();
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += gravity;
+        if (this.y + this.radius >= 0 && this.sparks.length < sparkCount) {
+          for (let i = 0; i < sparkCount; i++) {
+            this.sparks.push(new Spark(this.x, this.y, this.color));
+          }
+        }
+        for (let i = 0; i < this.sparks.length; i++) {
+          const spark = this.sparks[i];
+          spark.update();
+          if (performance.now() - spark.createdAt > sparkLifetime) {
+            this.sparks.splice(i, 1);
+            i--;
+          }
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        for (const spark of this.sparks) {
+          spark.draw();
+        }
+      }
+    }
+
+    class Spark {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = Math.random() * 4 - 2;
+        this.vy = Math.random() * -4 - 2;
+        this.radius = sparkRadius;
+        this.color = color;
+        this.createdAt = performance.now();
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += gravity;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+    }
+
+    function drawMoon() {
+      const moonX = canvas.width - 160; // Right side
+      const moonY = 100;
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, 60, 0, 2 * Math.PI);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(moonX - 50, moonY, 60, 0, 2 * Math.PI); // Adjusted the x position to the left
+      ctx.fillStyle = '#000';
+      ctx.fill();
+    }
+
+    function drawBackground() {
+      const houseCount = 5; // Number of houses
+      const houseWidth = 150; // Increased house width
+      const spacing = (canvas.width - houseWidth * houseCount) / (houseCount + 1); // Calculate spacing between houses
+
+      for (let i = 0; i < houseCount; i++) {
+        let baseX = spacing + i * (houseWidth + spacing); // Calculate x position of each house
+        ctx.fillStyle = 'red';
+        ctx.fillRect(baseX, canvas.height - 150, houseWidth, 150); // Increased house height
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.moveTo(baseX, canvas.height - 150);
+        ctx.lineTo(baseX + houseWidth / 2, canvas.height - 200);
+        ctx.lineTo(baseX + houseWidth, canvas.height - 150);
+        ctx.closePath();
+        ctx.fill();
+
+        // Person near each house
+        ctx.beginPath();
+        ctx.arc(baseX + houseWidth / 2, canvas.height - 75, 15, 0, 2 * Math.PI); // Increased person size
+        ctx.fillStyle = 'beige';
+        ctx.fill();
+        ctx.fillStyle = 'green';
+        ctx.fillRect(baseX + houseWidth / 2 - 15, canvas.height - 60, 30, 45); // Adjusted person position
+      }
+    }
+
+    const fireworks = [];
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawMoon();
+      drawBackground();
+      drawStars(); // Draw stars
+      if (fireworks.length < fireworkCount && Math.random() < 0.1) {
+        fireworks.push(new Firework());
+      }
+      for (let i = 0; i < fireworks.length; i++) {
+        const firework = fireworks[i];
+        firework.update();
+        firework.draw();
+        if (performance.now() - firework.createdAt > fireworkLifetime) {
+          fireworks.splice(i, 1);
+          i--;
+        }
+      }
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
